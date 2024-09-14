@@ -1,0 +1,55 @@
+// CONTROLLER
+
+module controller(input logic [10:0] instr,
+				  input logic reset, ExtIRQ,
+				  output logic [3:0] AluControl, EStatus,						
+				  output logic reg2loc, regWrite, AluSrc, Branch,
+							   memtoReg, memRead, memWrite,
+				  output logic ERet, Exc, ExcAck, ExtlAck);
+											
+	logic [1:0] AluOp_s;
+
+											
+	maindec 	decPpal 	(.Op(instr),
+							.ExtIRQ(ExtIRQ), //(new!)
+							.Reset(reset),
+							.Reg2Loc(reg2loc), 
+							.MemtoReg(memtoReg), 
+							.RegWrite(regWrite), 
+							.MemRead(memRead), 
+							.MemWrite(memWrite), 
+							.Branch(Branch), 
+							.ERet(ERet), //(new!)
+							.EStatus(EStatus), //(new!)
+							.ALUOp(AluOp_s),
+							.ALUSrc(AluSrc),
+							.Exc(Exc),
+							.ExtlAck(ExtlAck)); //(new!)
+					
+								
+	aludec 	decAlu 	(.funct(instr), 
+							.aluop(AluOp_s), 
+							.alucontrol(AluControl));
+
+	if(ExcAck == 1 && ExtIRQ == 1)begin
+		assign ExtlAck = 1;
+	end else
+		assign ExcAck = 0;
+			
+endmodule
+
+/*
+		input [10:0] Op,
+		input        ExtIRQ,//Agrego señal (new!) 
+		input        Reset, //Agrego la señal reset. (new!)
+		output       Reg2Loc,
+					 MemtoReg,
+					 RegWrite,
+					 MemRead,
+					 MemWrite,
+					 Branch, 
+					 ERet, //(new!)
+		output [3:0] Status, //(new!)
+		output [1:0] ALUOp, ALUSrc,
+		output       Exc //Agrego la señal (new!)
+*/
